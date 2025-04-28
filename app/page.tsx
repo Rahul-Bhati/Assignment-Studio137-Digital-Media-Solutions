@@ -6,12 +6,11 @@ import { useState } from 'react';
 
 export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [tasks, setTasks] = useState(getTasks);
   const [filteredTasks, setFilteredTasks] = useState(getTasks);
 
   const handleSearch = (query:string) => {
     setSearchQuery(query);
-    const filtered = tasks.filter((task) =>
+    const filtered = getTasks.filter((task) =>
       task.title.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredTasks(filtered);

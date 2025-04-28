@@ -7,7 +7,6 @@ import { ArrowUpDown, ListFilter, SquarePen, Trash2, X } from 'lucide-react';
 import AddEditTaskModal from './AddEditTaskModal';
 
 export default function TasksTable({ tasks }: { tasks: Task[] }) {
-    const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<'title' | 'dueDate' | 'priority'>('dueDate');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [filterByStatus, setFilterByStatus] = useState<'all' | 'completed' | 'in-progress'>('all');
@@ -19,6 +18,11 @@ export default function TasksTable({ tasks }: { tasks: Task[] }) {
     const [showAddEditModal, setShowAddEditModal] = useState(false);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+    const [tempPriorityFilter, setTempPriorityFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+    const [tempStatusFilter, setTempStatusFilter] = useState<'all' | 'completed' | 'in-progress'>('all');
+    const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+
 
     const router = useRouter();
 
@@ -75,18 +79,18 @@ export default function TasksTable({ tasks }: { tasks: Task[] }) {
         setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     };
 
-    // Handle filtering by status
-    const handleSortByStatus = () => {
-        // setFilterByStatus(status);
-    };
+    // // Handle filtering by status
+    // const handleSortByStatus = () => {
+    //     // setFilterByStatus(status);
+    // };
 
-    // Handle filtering by priority
-    const handleSortByPriorityFilter = (priority: 'all' | 'low' | 'medium' | 'high') => {
-        setFilterByPriority(priority);
-        allTasks.filter(task => task.priority.toLowerCase() === priority);
+    // // Handle filtering by priority
+    // const handleSortByPriorityFilter = (priority: 'all' | 'low' | 'medium' | 'high') => {
+    //     setFilterByPriority(priority);
+    //     allTasks.filter(task => task.priority.toLowerCase() === priority);
 
-        setTasks(allTasks);
-    };
+    //     setTasks(allTasks);
+    // };
 
     useEffect(() => {
         // Sorting and filtering logic
@@ -108,6 +112,19 @@ export default function TasksTable({ tasks }: { tasks: Task[] }) {
             });
         }
 
+        if (filterByStatus !== 'all') {
+            filteredTasks = filteredTasks.filter(task =>
+                task.status.toLowerCase() === filterByStatus
+            );
+        }
+
+        if (filterByPriority !== 'all') {
+            filteredTasks = filteredTasks.filter(task =>
+                task.priority.toLowerCase() === filterByPriority
+            );
+        }
+
+
         console.log(filteredTasks);
         setTasks(filteredTasks);
     }, [sortBy, sortOrder, filterByStatus, filterByPriority, tasks]);
@@ -123,7 +140,63 @@ export default function TasksTable({ tasks }: { tasks: Task[] }) {
                     <button className="flex items-center border-[#941B0F] text-[#941B0F] border font-semibold py-2 px-4 rounded font-['Proxima_Nova'] cursor-pointer" onClick={handleSortDueDate}>
                         <ArrowUpDown className='mr-3' size={20} /> Sort
                     </button>
-                    <div
+
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsFilterDropdownOpen(prev => !prev)}
+                            className="flex items-center border-[#941B0F] text-[#941B0F] border font-semibold py-2 px-4 rounded font-['Proxima_Nova'] cursor-pointer"
+                        >
+                            <ListFilter className="mr-3" size={20} />
+                            Filter
+                        </button>
+
+                        <div
+                            className={`
+      absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg p-4 z-10 transform transition-all duration-300 ease-in-out origin-top
+      ${isFilterDropdownOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 pointer-events-none'}
+    `}
+                        >
+                            <div className="mb-4">
+                                <label className="block mb-1 text-sm font-medium text-gray-700">Priority</label>
+                                <select
+                                    value={tempPriorityFilter}
+                                    onChange={(e) => setTempPriorityFilter(e.target.value as 'low' | 'medium' | 'high' | 'all')}
+                                    className="w-full border rounded p-2"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div className="mb-4">
+                                <label className="block mb-1 text-sm font-medium text-gray-700">Status</label>
+                                <select
+                                    value={tempStatusFilter}
+                                    onChange={(e) => setTempStatusFilter(e.target.value as 'completed' | 'in-progress' | 'all')}
+                                    className="w-full border rounded p-2"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setFilterByPriority(tempPriorityFilter);
+                                    setFilterByStatus(tempStatusFilter);
+                                    setIsFilterDropdownOpen(false);
+                                }}
+                                className="bg-[#941B0F] text-white w-full py-2 rounded hover:bg-red-700"
+                            >
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+
+
+
+                    {/* <div
                         className="flex items-center border-[#941B0F] text-[#941B0F] border font-semibold py-2 px-4 rounded font-['Proxima_Nova'] cursor-pointer"
                     >
                         <ListFilter className="mr-3" size={20} />
@@ -137,7 +210,7 @@ export default function TasksTable({ tasks }: { tasks: Task[] }) {
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
                         </select>
-                    </div>
+                    </div> */}
 
                 </div>
             </div>
